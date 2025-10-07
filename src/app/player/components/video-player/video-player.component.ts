@@ -156,6 +156,7 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
                 player: this.settingsStore.player(),
                 showCaptions: this.settingsStore.showCaptions(),
             };
+            console.log('[VIDEO-PLAYER] Player settings changed:', this.playerSettings);
         });
     }
 
@@ -243,11 +244,15 @@ export class VideoPlayerComponent implements OnInit, OnDestroy {
      */
     applySettings(): void {
         this.storage.get(STORE_KEY.Settings).subscribe((settings: Settings) => {
+            console.log('[VIDEO-PLAYER] Loading settings from storage:', settings);
             if (settings && Object.keys(settings).length > 0) {
                 this.playerSettings = {
                     player: settings.player || VideoPlayer.VideoJs,
                     showCaptions: settings.showCaptions || false,
                 };
+                console.log('[VIDEO-PLAYER] Applied settings:', this.playerSettings);
+            } else {
+                console.log('[VIDEO-PLAYER] No settings found, using defaults');
             }
         });
     }

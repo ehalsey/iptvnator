@@ -31,8 +31,8 @@
                             sources: [
                                 {
                                     src:
-                                        activeChannel?.url +
-                                        activeChannel?.epgParams,
+                                        activeChannel.url +
+                                        (activeChannel.epgParams || ''),
                                     type: 'application/x-mpegURL',
                                 },
                             ],

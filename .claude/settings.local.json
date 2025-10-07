@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose up:*)",
+      "Read(//c/Users/ehals/Downloads/**)",
+      "Bash(docker-compose:*)",
+      "Bash(docker build:*)",
+      "Bash(docker exec:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

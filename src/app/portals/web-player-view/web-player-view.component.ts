@@ -37,11 +37,12 @@ export class WebPlayerViewComponent {
 
     constructor() {
         effect(() => {
-            this.player = this.settings()?.player;
+            this.player = this.settings()?.player || VideoPlayer.VideoJs;
 
             this.setChannel(this.streamUrl());
-            if (this.player === VideoPlayer.VideoJs)
-                this.setVjsOptions(this.streamUrl());
+
+            // Always set VJS options as fallback
+            this.setVjsOptions(this.streamUrl());
         });
     }
 
