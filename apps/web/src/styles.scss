@@ -1,0 +1,125 @@
+@use '../../../libs/ui/components/src/lib/resizable/resizable.scss';
+
+// ─── Tailwind CSS ─────────────────────────────────────────────────────────────
+// Preflight is disabled in tailwind.config.js to avoid conflicts with
+// Angular Material. Only components + utilities are loaded.
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+// ─── Third-party ─────────────────────────────────────────────────────────────
+@import '@yangkghjh/videojs-aspect-ratio-panel/dist/videojs-aspect-ratio-panel.css';
+
+// ─── Google Fonts ─────────────────────────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+// ─── Shared Components ────────────────────────────────────────────────────────
+
+// ─── macOS specific: space for traffic lights ─────────────────────────────────
+app-root.macos-platform app-header .modern-header {
+    padding-left: 80px;
+}
+
+app-root.macos-platform .current-playlist {
+    padding-top: 30px;
+}
+
+app-root.macos-platform app-navigation .portal-status-container {
+    padding-top: 30px;
+}
+
+// ─── Base ─────────────────────────────────────────────────────────────────────
+body,
+html {
+    user-select: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family:
+        'Inter',
+        'Roboto',
+        'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+// Re-enable context menu and text selection for input fields
+input,
+textarea {
+    user-select: text;
+}
+
+@media (display-mode: standalone) {
+    body {
+        overscroll-behavior-y: contain;
+        overflow: hidden;
+    }
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+.mat-tab-label-active {
+    opacity: 1 !important;
+}
+
+input,
+button,
+textarea,
+:focus {
+    outline: none;
+}
+
+// ─── Dark Theme ───────────────────────────────────────────────────────────────
+.dark-theme {
+    background: var(--mat-sys-surface) !important;
+
+    // Refined scrollbar for dark mode
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--mat-sys-outline-variant);
+        border-radius: 999px;
+
+        &:hover {
+            background-color: var(--mat-sys-outline);
+        }
+    }
+}
+
+// ─── Dialogs ──────────────────────────────────────────────────────────────────
+.about-dialog-overlay {
+    .mat-mdc-dialog-surface {
+        text-align: center;
+        background: var(--mat-sys-surface) !important;
+        color: var(--mat-sys-on-surface) !important;
+        padding: 10px;
+    }
+}
+
+.scroll-viewport-portals {
+    min-height: calc(100vh - 170px) !important;
+    overflow-x: hidden !important;
+}
+
+.mat-drawer-inner-container {
+    overflow: hidden !important;
+}
+
+.cdk-overlay-backdrop {
+    backdrop-filter: blur(4px);
+}
+
+// Full-screen overlay dialogs (global search/recent) must stay interactive in Electron.
+.global-search-overlay,
+.global-search-overlay .mat-mdc-dialog-surface,
+.global-search-overlay .mat-mdc-dialog-container {
+    app-region: no-drag;
+}
+

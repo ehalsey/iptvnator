@@ -1,0 +1,9 @@
+<div class="stalker-container">
+    @if (!isWorkspaceLayout) {
+        <app-navigation
+            class="navigation-sidebar"
+            [selectedContentType]="stalkerStore.selectedContentType()"
+        />
+    }
+    <router-outlet />
+</div>

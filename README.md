@@ -9,11 +9,11 @@
  <img alt="GitHub Workflow Status" src="https://img.shields.io/github/actions/workflow/status/4gray/iptvnator/build-and-test.yaml?style=for-the-badge&logo=github"> <a href="https://github.com/4gray/iptvnator/releases"><img src="https://img.shields.io/github/downloads/4gray/iptvnator/total?style=for-the-badge&logo=github" alt="Releases"></a> <a href="https://codecov.io/gh/4gray/iptvnator"><img alt="Codecov" src="https://img.shields.io/codecov/c/github/4gray/iptvnator?style=for-the-badge"></a> <a href="https://t.me/iptvnator"><img src="https://img.shields.io/badge/telegram-iptvnator-blue?logo=telegram&style=for-the-badge" alt="Telegram"></a> <a href="https://bsky.app/profile/iptvnator.bsky.social"><img src="https://img.shields.io/badge/bluesky-iptvnator-darkblue?logo=bluesky&style=for-the-badge" alt="Bluesky"></a>
 </p>
 
-<a href="https://t.me/iptvnator">Telegram channel for discussions</a>
+🌐 **[Website](https://4gray.github.io/iptvnator/)** | <a href="https://t.me/iptvnator">Telegram channel for discussions</a> | <a href="https://ko-fi.com/4gray" target="_blank">Buy me a coffee</a> | <a href="https://github.com/sponsors/4gray">GitHub Sponsors</a>
 
 **IPTVnator** is a video player application that provides support for IPTV playlist playback (m3u, m3u8). The application allows users to import playlists using remote URLs or by uploading files from the local file system. Additionally, it supports EPG information in XMLTV format which can be provided via URL.
 
-The application is a cross-platform, open-source project built with ~~Electron~~ Tauri and Angular.
+The application is a cross-platform, open-source project built with Electron and Angular.
 
 ⚠️ Note: IPTVnator does not provide any playlists or other digital content. The channels and pictures in the screenshots are for demonstration purposes only.
 
@@ -108,30 +108,87 @@ sudo emerge iptvnator-bin
 
 <a href="https://github.com/sponsors/4gray" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-green.png" alt="Buy Me A Coffee" width="185"></a>
 
+## Troubleshooting
+
+### macOS: "App is damaged and can't be opened"
+
+Due to Apple's Gatekeeper security and code signing requirements, you may need to remove the quarantine flag from the downloaded application:
+
+```bash
+xattr -c /Applications/IPTVnator.app
+```
+
+Alternatively, if the app is located in a different directory:
+
+```bash
+xattr -c ~/Downloads/IPTVnator.app
+```
+
+### Linux: chrome-sandbox Issues
+
+If you encounter the following error when launching IPTVnator:
+
+```
+The SUID sandbox helper binary was found, but is not configured correctly.
+Rather than run without sandboxing I'm aborting now.
+You need to make sure that chrome-sandbox is owned by root and has mode 4755.
+```
+
+**Solution 1: Fix chrome-sandbox permissions (Recommended for .deb/.rpm installations)**
+
+Navigate to the IPTVnator installation directory and run:
+
+```bash
+sudo chown root:root chrome-sandbox
+sudo chmod 4755 chrome-sandbox
+```
+
+**Solution 2: Launch with --no-sandbox flag**
+
+Edit the desktop launcher file to add the `--no-sandbox` flag:
+
+1. Find your desktop file location:
+   - **Ubuntu/Debian**: `~/.local/share/applications/iptvnator.desktop`
+   - **System-wide**: `/usr/share/applications/iptvnator.desktop`
+
+2. Edit the file and modify the `Exec` line:
+
+   ```
+   Exec=iptvnator --no-sandbox %U
+   ```
+
+3. Save the file and relaunch the application from your application menu.
+
+Alternatively, you can launch IPTVnator from the terminal with the flag:
+
+```bash
+iptvnator --no-sandbox
+```
+
 ## How to Build and Develop
 
 Requirements:
 
--   Node.js with npm
--   Rust (required for tauri)
+-   Node.js with pnpm (via Corepack)
 
 1. Clone this repository and install project dependencies:
 
     ```
-    $ npm install
+    $ corepack enable
+    $ pnpm install
     ```
 
 2. Start the application:
     ```
-    $ npm run tauri dev
+    $ pnpm run serve:backend
     ```
 
-This will open the Tauri version in a separate window, while the PWA version will be available at http://localhost:4200.
+This will open the Electron app in a separate window, while the Angular dev server will run at http://localhost:4200.
 
-To run only the Angular app without Tauri, use:
+To run only the Angular app without Electron, use:
 
 ```
-$ npm run serve
+$ pnpm run serve:frontend
 ```
 
 ## Disclaimer

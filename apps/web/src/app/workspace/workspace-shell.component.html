@@ -1,0 +1,283 @@
+<div class="workspace-shell">
+    <aside class="app-rail" [class.is-macos]="isMacOS">
+        <a
+            class="brand"
+            routerLink="/workspace/dashboard"
+            matTooltip="Dashboard (all playlists)"
+            [matTooltipPosition]="'right'"
+            aria-label="Open dashboard"
+        >
+            <img src="./assets/icons/icon-tv-256.png" alt="IPTVnator logo" />
+        </a>
+
+        <app-portal-rail-links
+            variant="rail"
+            activeClass="is-active"
+            [links]="workspaceLinks"
+        />
+
+        @if (primaryContextLinks().length > 0) {
+            <div class="rail-divider"></div>
+            <app-portal-rail-links
+                variant="rail"
+                activeClass="is-active"
+                [selectedSection]="currentSection()"
+                [links]="primaryContextLinks()"
+            />
+        }
+
+        @if (secondaryContextLinks().length > 0) {
+            <div class="rail-divider"></div>
+            <app-portal-rail-links
+                variant="rail"
+                activeClass="is-active"
+                [selectedSection]="currentSection()"
+                [links]="secondaryContextLinks()"
+            />
+        }
+
+        <div class="rail-footer">
+            <a
+                class="rail-shortcut"
+                routerLink="/workspace/settings"
+                [class.is-active]="isSettingsRoute()"
+                matTooltip="Settings (global)"
+                [matTooltipPosition]="'right'"
+                aria-label="Open settings"
+            >
+                <mat-icon>settings</mat-icon>
+            </a>
+        </div>
+    </aside>
+
+    <header class="workspace-header">
+        <app-playlist-switcher
+            class="playlist-switcher"
+            [currentTitle]="playlistTitle()"
+            [subtitle]="playlistSubtitle()"
+        />
+
+        <label class="search-field">
+            <mat-icon>search</mat-icon>
+            <input
+                type="search"
+                spellcheck="false"
+                [value]="searchQuery()"
+                (input)="onSearchInput($event)"
+                (keydown.enter)="onSearchEnter($event)"
+                [disabled]="!canUseSearch()"
+                [placeholder]="searchPlaceholder()"
+                aria-label="Search"
+            />
+            <button
+                type="button"
+                class="command-trigger"
+                mat-icon-button
+                (click)="openCommandPalette()"
+                matTooltip="Command palette (Ctrl/Cmd+K)"
+                aria-label="Open command palette"
+            >
+                <mat-icon>keyboard_command_key</mat-icon>
+            </button>
+        </label>
+
+        <div class="header-actions">
+            <button
+                type="button"
+                mat-icon-button
+                [matMenuTriggerFor]="addPlaylistMenu().menu()"
+                matTooltip="Add playlist (all playlists)"
+                aria-label="Add playlist"
+            >
+                <mat-icon>add</mat-icon>
+            </button>
+            <app-add-playlist-menu
+                (playlistTypeSelected)="openAddPlaylistDialog($event)"
+            />
+            <a
+                class="header-shortcut"
+                mat-icon-button
+                routerLink="/workspace/global-favorites"
+                [class.is-active]="isGlobalFavoritesRoute()"
+                matTooltip="Global favorites (all playlists)"
+                aria-label="Open global favorites"
+            >
+                <mat-icon>star</mat-icon>
+            </a>
+            @if (isElectron) {
+                <button
+                    type="button"
+                    class="header-shortcut"
+                    mat-icon-button
+                    [class.is-active]="isDownloadsView()"
+                    (click)="openDownloadsShortcut()"
+                    matTooltip="Downloads (all playlists)"
+                    aria-label="Open downloads"
+                >
+                    <mat-icon>download</mat-icon>
+                </button>
+            }
+            <button
+                type="button"
+                mat-icon-button
+                [matMenuTriggerFor]="contextActionsMenu"
+                matTooltip="Context actions (this section)"
+                aria-label="Open context actions"
+            >
+                <mat-icon>more_horiz</mat-icon>
+            </button>
+        </div>
+
+        <mat-menu #contextActionsMenu="matMenu">
+            @if (!hasContextActions()) {
+                <button mat-menu-item disabled>
+                    <span>No actions for this section</span>
+                </button>
+            } @else {
+                @if (contextActionGroups().hasPlaylistActions) {
+                    @if (canOpenPlaylistInfo()) {
+                        <button mat-menu-item (click)="openPlaylistInfo()">
+                            <mat-icon>playlist_play</mat-icon>
+                            <span>Playlist info (this playlist)</span>
+                        </button>
+                    }
+                    @if (canOpenAccountInfo()) {
+                        <button mat-menu-item (click)="openAccountInfo()">
+                            <mat-icon>person</mat-icon>
+                            <span>Account info (this playlist)</span>
+                        </button>
+                    }
+                }
+
+                @if (
+                    contextActionGroups().hasPlaylistActions &&
+                    (contextActionGroups().hasSectionActions ||
+                        contextActionGroups().hasCleanupActions)
+                ) {
+                    <mat-divider />
+                }
+
+                @if (contextActionGroups().hasSectionActions) {
+                    @if (canManageCategories()) {
+                        <button mat-menu-item (click)="openManageCategories()">
+                            <mat-icon>tune</mat-icon>
+                            <span>Manage categories (this section)</span>
+                        </button>
+                    }
+                    @if (canSort()) {
+                        <button mat-menu-item [matMenuTriggerFor]="sortMenu">
+                            <mat-icon>sort</mat-icon>
+                            <span>Sort content (this section)</span>
+                        </button>
+                    }
+                }
+
+                @if (
+                    contextActionGroups().hasCleanupActions &&
+                    (contextActionGroups().hasPlaylistActions ||
+                        contextActionGroups().hasSectionActions)
+                ) {
+                    <mat-divider />
+                }
+
+                @if (headerBulkAction(); as action) {
+                    <button
+                        mat-menu-item
+                        (click)="runHeaderBulkAction()"
+                        [disabled]="action.disabled"
+                        [attr.aria-label]="action.ariaLabel"
+                    >
+                        <mat-icon>{{ action.icon }}</mat-icon>
+                        <span>{{ action.tooltip }}</span>
+                    </button>
+                }
+            }
+        </mat-menu>
+
+        <mat-menu #sortMenu="matMenu">
+            <button mat-menu-item (click)="setContentSortMode('date-desc')">
+                <span>{{ 'WORKSPACE.SORT_DATE_DESC' | translate }}</span>
+                @if (contentSortMode() === 'date-desc') {
+                    <mat-icon>check</mat-icon>
+                }
+            </button>
+            <button mat-menu-item (click)="setContentSortMode('date-asc')">
+                <span>{{ 'WORKSPACE.SORT_DATE_ASC' | translate }}</span>
+                @if (contentSortMode() === 'date-asc') {
+                    <mat-icon>check</mat-icon>
+                }
+            </button>
+            <button mat-menu-item (click)="setContentSortMode('name-asc')">
+                <span>{{ 'WORKSPACE.SORT_NAME_ASC' | translate }}</span>
+                @if (contentSortMode() === 'name-asc') {
+                    <mat-icon>check</mat-icon>
+                }
+            </button>
+            <button mat-menu-item (click)="setContentSortMode('name-desc')">
+                <span>{{ 'WORKSPACE.SORT_NAME_DESC' | translate }}</span>
+                @if (contentSortMode() === 'name-desc') {
+                    <mat-icon>check</mat-icon>
+                }
+            </button>
+        </mat-menu>
+    </header>
+
+    <div class="workspace-body" [class.single-pane]="!showContextPanel()">
+        @if (isSourcesRoute()) {
+            <aside
+                class="context-panel context-panel--sources"
+                appResizable
+                [minWidth]="220"
+                [maxWidth]="440"
+                [defaultWidth]="290"
+                storageKey="sidebar-width"
+            >
+                <app-workspace-sources-filters-panel />
+            </aside>
+        } @else if (isCategoryContextRoute()) {
+            @if (currentContext(); as context) {
+                @if (currentSection(); as section) {
+                    <aside
+                        class="context-panel context-panel--route"
+                        appResizable
+                        [minWidth]="240"
+                        [maxWidth]="560"
+                        [defaultWidth]="300"
+                        storageKey="sidebar-width"
+                    >
+                        <app-workspace-context-panel
+                            [context]="context"
+                            [section]="section"
+                        />
+                    </aside>
+                }
+            }
+        } @else if (isSettingsRoute()) {
+            <aside
+                class="context-panel context-panel--settings"
+                appResizable
+                [minWidth]="200"
+                [maxWidth]="400"
+                [defaultWidth]="260"
+                storageKey="sidebar-width"
+            >
+                <app-workspace-settings-context-panel />
+            </aside>
+        } @else if (isFavoritesContextRoute()) {
+            <aside
+                class="context-panel context-panel--route"
+                appResizable
+                [minWidth]="200"
+                [maxWidth]="400"
+                [defaultWidth]="260"
+                storageKey="sidebar-width"
+            >
+                <app-workspace-favorites-context-panel />
+            </aside>
+        }
+
+        <main class="workspace-content">
+            <router-outlet />
+        </main>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+@if (selectedCategory()) {
+    @if (isStalker && selectedItem()) {
+        @if (contentType() === 'vod') {
+            @if (selectedItem().series?.length > 0) {
+                <!-- VOD item with embedded series (vclub or Ministra) -->
+                <app-stalker-series-view [vodWithSeries]="selectedItem()" />
+            } @else if (selectedItem().is_series) {
+                <!-- VOD item that is actually a series (Ministra plugin is_series=1) -->
+                <app-stalker-series-view />
+            } @else {
+                @if (vodDetailsItem()) {
+                    <app-vod-details
+                        [item]="vodDetailsItem()!"
+                        [isFavorite]="isSelectedVodFavorite()"
+                        [playbackPosition]="selectedVodPlaybackPosition()"
+                        (playClicked)="onVodPlay($event)"
+                        (resumeClicked)="onVodResume($event)"
+                        (favoriteToggled)="onVodFavoriteToggled($event)"
+                        (downloadRequested)="onVodDownload($event)"
+                        (backClicked)="onVodBack()"
+                    />
+                }
+            }
+        } @else if (contentType() === 'series') {
+            <app-stalker-series-view />
+        }
+    } @else {
+        <div class="category-content-layout">
+            <div class="category-content-header">
+                <div class="category-meta">
+                    <h2 class="category-title">{{ selectedCategoryTitle() }}</h2>
+                    <div class="category-subtitle">
+                        {{ categoryItemSubtitle() }}
+                    </div>
+                </div>
+                @if (categoryItemCount() > 0) {
+                    <mat-paginator
+                        [pageIndex]="pageIndex()"
+                        [length]="categoryItemCount()"
+                        [pageSize]="limit()"
+                        [pageSizeOptions]="pageSizeOptions"
+                        (page)="onPageChange($event)"
+                        aria-label="Select page"
+                    />
+                }
+            </div>
+            <app-grid-list
+                [isLoading]="isPaginatedContentLoading()"
+                [items]="contentWithProgress()"
+                (itemClicked)="onItemClick($event)"
+                [pageIndex]="pageIndex()"
+                [totalPages]="totalPages()"
+                [limit]="limit()"
+                [pageSizeOptions]="pageSizeOptions"
+                [showPaginator]="false"
+                (pageChange)="onPageChange($event)"
+            />
+        </div>
+    }
+} @else {
+    <app-playlist-error-view
+        [title]="'PORTALS.ERROR_VIEW.NO_CATEGORY_SELECTED.TITLE' | translate"
+        [description]="
+            'PORTALS.ERROR_VIEW.NO_CATEGORY_SELECTED.DESCRIPTION' | translate
+        "
+        [showActionButtons]="false"
+        [viewType]="'EMPTY_CATEGORY'"
+    />
+}
