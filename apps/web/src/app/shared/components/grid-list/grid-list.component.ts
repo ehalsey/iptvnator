@@ -17,6 +17,7 @@ interface GridListItem {
     category_id?: number | string;
     poster_url?: string;
     cover?: string;
+    stream_icon?: string;
     title?: string;
     o_name?: string;
     name?: string;
@@ -52,8 +53,8 @@ interface GridListItem {
             } @else {
                 @for (item of items(); track $index) {
                     @let i = $any(item);
-                    <mat-card (click)="itemClicked.emit(item)">
-                        @let poster = i.poster_url ?? i.cover;
+                    <mat-card (click)="itemClicked.emit(item)" tabindex="0" (keydown.enter)="itemClicked.emit(item)">
+                        @let poster = i.poster_url ?? i.cover ?? i.stream_icon;
                         <div class="card-thumbnail-container">
                             <img
                                 class="stream-icon"

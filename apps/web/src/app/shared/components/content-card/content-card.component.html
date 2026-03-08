@@ -1,4 +1,4 @@
-<div class="content-card" (click)="onCardClick()">
+<div class="content-card" (click)="onCardClick()" tabindex="0" (keydown.enter)="onCardClick()">
     <div class="thumbnail-wrapper">
         @if (showRemoveButton()) {
             <button

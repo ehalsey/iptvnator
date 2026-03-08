@@ -17,6 +17,7 @@ import {
     Theme,
 } from 'shared-interfaces';
 import { SettingsService } from './services/settings.service';
+import { TvNavigationService } from './services/tv-navigation.service';
 import { EpgProgressPanelComponent } from './shared/epg-progress-panel/epg-progress-panel.component';
 import { GlobalRecentlyViewedComponent } from './xtream-electron/recently-viewed/global-recently-viewed.component';
 import { GlobalSearchResultsComponent } from './xtream-electron/search-results/global-search-results.component';
@@ -41,6 +42,7 @@ export class AppComponent implements OnInit {
     private store = inject(Store);
     private translate = inject(TranslateService);
     private settingsService = inject(SettingsService);
+    private tvNavigation = inject(TvNavigationService);
 
     /** Default language as fallback */
     private readonly DEFAULT_LANG = Language.ENGLISH;
@@ -86,6 +88,7 @@ export class AppComponent implements OnInit {
 
         this.initSettings();
         this.triggerAutoUpdatePlaylists();
+        this.tvNavigation.initialize();
     }
 
     /**

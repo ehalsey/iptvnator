@@ -39,9 +39,16 @@ export class PwaService extends DataService {
     /** Proxy URL to avoid CORS issues */
     corsProxyUrl = AppConfig.BACKEND_URL;
 
+    /** Whether running inside Capacitor native shell (no CORS proxy needed) */
+    private readonly isCapacitor = !!(window as any).Capacitor?.isNativePlatform?.();
+
     constructor() {
         super();
-        console.log('PWA service initialized...');
+        console.log(
+            this.isCapacitor
+                ? 'Capacitor service initialized (direct mode)...'
+                : 'PWA service initialized...'
+        );
     }
 
     /** Uses service worker mechanism to check for available application updates */
@@ -182,15 +189,26 @@ export class PwaService extends DataService {
             : {};
         try {
             let result: any;
-            const response = await firstValueFrom(
-                this.http.get(`${this.corsProxyUrl}/xtream`, {
-                    params: {
-                        url: payload.url,
-                        ...payload.params,
-                    },
-                    ...headers,
-                })
-            );
+            let response: any;
+
+            if (this.isCapacitor) {
+                const { url, ...params } = { url: payload.url, ...payload.params };
+                const qs = new URLSearchParams(params).toString();
+                const directUrl = `${url}/player_api.php?${qs}`;
+                const fetchResponse = await fetch(directUrl, headers);
+                const data = await fetchResponse.json();
+                response = { payload: data };
+            } else {
+                response = await firstValueFrom(
+                    this.http.get(`${this.corsProxyUrl}/xtream`, {
+                        params: {
+                            url: payload.url,
+                            ...payload.params,
+                        },
+                        ...headers,
+                    })
+                );
+            }
 
             if (!(response as any).payload) {
                 const action = payload.params.action;
@@ -308,26 +326,41 @@ export class PwaService extends DataService {
         macAddress: string;
     }) {
         try {
-            // Build the query parameters
-            const params = new URLSearchParams({
-                url: payload.url,
-                ...payload.params,
-                macAddress: payload.macAddress,
-            });
+            let jsonData: any;
 
-            // Make the fetch request
-            const response = await fetch(
-                `${this.corsProxyUrl}/stalker?${params.toString()}`
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Error: ${response.statusText} (Status: ${response.status})`
+            if (this.isCapacitor) {
+                const qs = new URLSearchParams(payload.params).toString();
+                const directUrl = `${payload.url}?${qs}`;
+                const response = await fetch(directUrl, {
+                    headers: {
+                        Cookie: `mac=${payload.macAddress}`,
+                        'X-User-Agent': 'Model: MAG250; Link: WiFi',
+                    },
+                });
+                if (!response.ok) {
+                    throw new Error(
+                        `Error: ${response.statusText} (Status: ${response.status})`
+                    );
+                }
+                jsonData = await response.json();
+            } else {
+                const params = new URLSearchParams({
+                    url: payload.url,
+                    ...payload.params,
+                    macAddress: payload.macAddress,
+                });
+                const response = await fetch(
+                    `${this.corsProxyUrl}/stalker?${params.toString()}`
                 );
+                if (!response.ok) {
+                    throw new Error(
+                        `Error: ${response.statusText} (Status: ${response.status})`
+                    );
+                }
+                jsonData = (await response.json()).payload;
             }
 
-            // Parse and return the JSON response
-            return (await response.json()).payload;
+            return jsonData;
         } catch (err) {
             console.error('Stalker request error:', err);
 
@@ -343,6 +376,11 @@ export class PwaService extends DataService {
     }
 
     getPlaylistFromUrl(url: string) {
+        if (this.isCapacitor) {
+            return this.http.get(url, { responseType: 'text' }).pipe(
+                catchError((error) => throwError(() => error))
+            );
+        }
         return this.http.get(`${this.corsProxyUrl}/parse`, {
             params: { url },
         });

@@ -123,3 +123,47 @@ textarea,
     app-region: no-drag;
 }
 
+// ─── TV / Fire Stick D-pad focus styles ──────────────────────────────────────
+// The tv-mode class is added to body by TvNavigationService when on Capacitor.
+body.tv-mode {
+    // Only apply focus outlines to interactive elements, not containers
+    a:focus,
+    button:focus,
+    input:focus,
+    [tabindex]:not([tabindex="-1"]):focus {
+        outline: 2px solid var(--mat-sys-primary, #6750a4) !important;
+        outline-offset: 2px;
+    }
+
+    // Sidebar links get a prominent focus ring
+    .app-rail a:focus,
+    .navigation-sidebar a:focus {
+        outline: 2px solid var(--mat-sys-primary, #6750a4) !important;
+        outline-offset: -2px;
+        background: var(--mat-sys-surface-container-highest, rgba(255, 255, 255, 0.12));
+        border-radius: 8px;
+    }
+
+    // Content cards (grid-list and content-card)
+    mat-card:focus,
+    .content-card:focus {
+        outline: 2px solid var(--mat-sys-primary, #6750a4) !important;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 4px rgba(103, 80, 164, 0.3);
+    }
+
+    // Suppress focus on non-interactive containers
+    div:focus,
+    section:focus,
+    main:focus,
+    aside:focus,
+    nav:focus,
+    mat-drawer:focus,
+    mat-drawer-content:focus,
+    mat-sidenav:focus,
+    mat-sidenav-content:focus,
+    cdk-virtual-scroll-viewport:focus {
+        outline: none !important;
+    }
+}
+

@@ -226,7 +226,7 @@ export class PwaXtreamDataSource implements IXtreamDataSource {
         types: string[],
         _excludeHidden?: boolean
     ): Promise<XtreamContentItem[]> {
-        const results: any[] = [];
+        const results: XtreamContentItem[] = [];
         const searchLower = searchTerm.toLowerCase();
 
         for (const type of types) {
@@ -239,10 +239,26 @@ export class PwaXtreamDataSource implements IXtreamDataSource {
                 return title.toLowerCase().includes(searchLower);
             });
 
-            results.push(...filtered);
+            // Normalize raw API objects to XtreamContentItem shape
+            for (const item of filtered) {
+                results.push({
+                    id: item.stream_id ?? item.series_id ?? item.id ?? 0,
+                    xtream_id: item.stream_id ?? item.series_id ?? item.id ?? 0,
+                    category_id: item.category_id ?? '',
+                    title: item.name ?? item.title ?? '',
+                    name: item.name,
+                    poster_url: item.poster_url ?? item.stream_icon ?? item.cover ?? '',
+                    rating: item.rating ?? item.rating_5based ?? '',
+                    added: item.added ?? '',
+                    type,
+                    stream_id: item.stream_id,
+                    series_id: item.series_id,
+                    stream_icon: item.stream_icon,
+                } as XtreamContentItem);
+            }
         }
 
-        return results as XtreamContentItem[];
+        return results;
     }
 
     // =========================================================================

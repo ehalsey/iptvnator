@@ -28,9 +28,7 @@
                     "
                     [name]="item.title || item.name"
                     [logo]="item.stream_icon ?? item.poster_url"
-                    [selected]="
-                        xtreamStore.selectedItem()?.xtream_id === item.xtream_id
-                    "
+                    [selected]="isItemSelected(item)"
                     [epgProgram]="epgPrograms.get(item.xtream_id) ?? null"
                     [progressPercentage]="
                         currentProgramsProgress.get(item.xtream_id) ?? 0

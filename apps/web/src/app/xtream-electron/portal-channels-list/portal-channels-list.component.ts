@@ -106,7 +106,16 @@ export class PortalChannelsListComponent implements AfterViewInit, OnDestroy {
     }
 
     trackBy(_index: number, item: XtreamItem) {
-        return item.xtream_id;
+        return (item as any).xtream_id ?? (item as any).stream_id ?? (item as any).series_id;
+    }
+
+    /** Robust ID comparison that works with both DB-normalized and raw API objects */
+    isItemSelected(item: any): boolean {
+        const selected = this.xtreamStore.selectedItem();
+        if (!selected) return false;
+        const selectedId = selected.xtream_id ?? selected.stream_id ?? selected.series_id;
+        const itemId = item.xtream_id ?? item.stream_id ?? item.series_id;
+        return selectedId != null && selectedId === itemId;
     }
 
     ngOnInit(): void {
